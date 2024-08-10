@@ -84,6 +84,15 @@ try:
 except ImportError as e:
     cohere_import_exception = e
 
+
+try:
+    from autogen.oai.nvidia import NvidiaClient
+
+    nvidia_import_exception: Optional[ImportError] = None
+except ImportError as e:
+    nvidia_import_exception = e
+
+
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     # Add the console handler.
@@ -519,6 +528,12 @@ class OpenAIWrapper:
                     raise ImportError("Please install `cohere` to use the Groq API.")
                 client = CohereClient(**openai_config)
                 self._clients.append(client)
+            elif api_type is not None and api_type.startswith("nvidia"):
+                if nvidia_import_exception:
+                    raise ImportError("Please install `nvidia` to use the Nvidia NIM API.")
+                client = NvidiaClient(**openai_config)
+                self._clients.append(client)                
+
             else:
                 client = OpenAI(**openai_config)
                 self._clients.append(OpenAIClient(client))
